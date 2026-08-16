@@ -1,7 +1,7 @@
 ---
 name: ai-tutor
-description: AI 学习助教。当用户需要讲解错题、解释知识点、制定学习计划、生成测验或整理错题本时使用。覆盖数学、物理、化学、生物、英语、语文、历史、地理等学科，适合初高中及大学基础课程。
-version: 1.1.0
+description: An AI learning tutor skill that explains mistakes step by step, teaches concepts, builds study plans, generates quizzes, and manages a mistake book with forgetting-curve review scheduling. For math, physics, chemistry, biology, English, Chinese, history, geography and more. / AI 学习助教：错题讲解、知识点解析、学习计划、测验、错题本与遗忘曲线复习。
+version: 1.2.0
 ---
 
 # AI 学习助教（ai-tutor）

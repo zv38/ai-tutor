@@ -1,5 +1,7 @@
 # AI 学习助教（ai-tutor）
 
+> **An AI learning tutor skill pack**: explain mistakes, teach concepts, plan study, quiz, and review with a forgetting-curve-driven mistake book. Works with Claude Code / Cursor / any agent that supports Agent Skills.
+
 一个给 AI 代理使用的「学习助教」技能包（Skill Pack）。它把「怎么把一个知识点讲清楚、怎么帮学生把错题真正弄懂」的方法论固化下来，让 AI 在任何对话里都能像一位耐心的私教一样教学。
 
 ## 演示 Demo
