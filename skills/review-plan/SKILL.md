@@ -1,7 +1,7 @@
 ---
 name: review-plan
 parent: ai-tutor
-description: 学习计划 / 复习安排。当用户要一份学习计划、复习计划、考前冲刺安排、To-Do 时使用。产物：分日/分周计划 + 优先级 + 复盘节点。
+description: Create study / review plans. Use when a user wants a study plan, review schedule, or exam-cram timeline. Outputs: day/week-by-week plan + priorities + review checkpoints. / 学习计划 / 复习安排。当用户要一份学习计划、复习计划、考前冲刺安排、To-Do 时使用。产物：分日/分周计划 + 优先级 + 复盘节点。
 ---
 
 # 学习计划（review-plan）

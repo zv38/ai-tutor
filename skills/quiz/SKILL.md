@@ -1,7 +1,7 @@
 ---
 name: quiz
 parent: ai-tutor
-description: 测验 / 巩固题。当用户要一套练习题、小测、自测题，或刚学完要巩固时使用。产物：题目 + 答案与解析 + 批改反馈。
+description: Generate quizzes / practice sets. Use when a user wants practice questions, a mini test, or self-assessment right after learning. Outputs: questions + answers with explanations + grading feedback. / 测验 / 巩固题。当用户要一套练习题、小测、自测题，或刚学完要巩固时使用。产物：题目 + 答案与解析 + 批改反馈。
 ---
 
 # 测验 / 巩固（quiz）

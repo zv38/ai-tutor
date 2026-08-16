@@ -1,7 +1,7 @@
 ---
 name: mistake-book
 parent: ai-tutor
-description: 错题本管理（记录、归类、回顾）。当用户想登记一道错题、整理错题本、按学科/题型回顾、做周期性复习、或导出错题本时使用。产物：结构化错题记录 + 归类标签 + 复习提醒。
+description: Manage a mistake book (record, categorize, review). Use when a user wants to log a wrong answer, organize their mistake book, review by subject/type, schedule periodic review, or export it. Outputs: structured records + tags + review reminders. / 错题本管理（记录、归类、回顾）。当用户想登记一道错题、整理错题本、按学科/题型回顾、做周期性复习、或导出错题本时使用。产物：结构化错题记录 + 归类标签 + 复习提醒。
 ---
 
 # 错题本管理（mistake-book）

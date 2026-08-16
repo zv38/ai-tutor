@@ -1,7 +1,7 @@
 ---
 name: explain-mistake
 parent: ai-tutor
-description: 错题讲解。当用户发来一道做错的题、一段写错的过程，希望搞清「错在哪、为什么会错、怎么改」时使用。产物：错因诊断 + 分步讲解 + 同类巩固题。
+description: Explain mistakes in homework. Use when a user sends a wrong answer or flawed reasoning and wants to know what went wrong, why, and how to fix it. Outputs: error diagnosis + step-by-step explanation + similar practice questions. / 错题讲解。当用户发来一道做错的题、一段写错的过程，希望搞清「错在哪、为什么会错、怎么改」时使用。产物：错因诊断 + 分步讲解 + 同类巩固题。
 ---
 
 # 错题讲解（explain-mistake）

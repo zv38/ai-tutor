@@ -1,7 +1,7 @@
 ---
 name: explain-concept
 parent: ai-tutor
-description: 知识点讲解。当用户想理解某个概念、定义、公式、定理、规律，或「这个词是什么意思、这个原理怎么理解」时使用。产物：概念拆解 + 类比理解 + 易混辨析 + 自测。
+description: Explain concepts step by step. Use when a user wants to understand a concept, definition, formula, theorem, or principle — "what does this mean / how does this work". Outputs: concept breakdown + analogies + easy-to-confuse comparison + self-check. / 知识点讲解。当用户想理解某个概念、定义、公式、定理、规律，或「这个词是什么意思、这个原理怎么理解」时使用。产物：概念拆解 + 类比理解 + 易混辨析 + 自测。
 ---
 
 # 知识点讲解（explain-concept）
