@@ -107,4 +107,8 @@ node scripts/mistake-book.mjs list --subject 数学 / get 1 / rm 1 / stats
 
 ## 许可
 
-[MIT](./LICENSE)
+本项目基于 [MIT License](./LICENSE) 开源，你可以自由地使用、修改、分发和商用，但需保留版权声明和许可声明。
+
+## 第三方依赖
+
+本项目脚本仅使用 Node.js 标准库，**无第三方运行时依赖**，开箱即用。
