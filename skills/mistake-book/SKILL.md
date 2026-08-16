@@ -42,6 +42,16 @@ description: 错题本管理（记录、归类、回顾）。当用户想登记�
 - 给每条记录打 1-3 个知识点标签，方便日后检索
 - 同一知识点反复错 → 标记为「高频易错」，重要度升级
 
+### 第 4 步：持久化并进入复习闭环
+用脚本将记录写入 `data/mistake-book.json`，并自动纳入遗忘曲线调度：
+```bash
+node scripts/review-cycle.mjs add \
+    --subject <学科> --chapter <章节> --title "<题干原文>" \
+    --mistake "<错误做法>" --answer "<正确解法>" \
+    --type <错因类型> --tags "<知识点,知识点>" --importance <高|中|低>
+```
+> 脚本会为它自动计算首次复习日期并写入掌握状态字段（`nextDue` / `intervalIdx` / `mastery`）。
+
 ## 回顾流程（复习错题）
 
 ### 按需复习
@@ -49,10 +59,22 @@ description: 错题本管理（记录、归类、回顾）。当用户想登记�
 - 一条错误 ≥ 2 次时，优先放在最前面
 
 ### 周期复习（遗忘曲线）
-建议按「第 1 天 → 第 3 天 → 第 7 天 → 第 15 天 → 第 30 天」安排复现：
-- 每次复习：先遮住答案，让学生**独立重做**
-- 做对 → 进入下一间隔；做错 → 间隔重置，并重新走 `explain-mistake`
-- 连续 3 次做对 → 标记为「已掌握」，可降为低频
+遗忘曲线的调度由脚本 `scripts/review-cycle.mjs` 实际驱动（数据存于 `data/mistake-book.json`），按「第 1 天 → 第 3 天 → 第 7 天 → 第 15 天 → 第 30 天」自动计算每次复习日期：
+
+```bash
+node scripts/review-cycle.mjs due          # 今天到期待复习的错题
+node scripts/review-cycle.mjs card <id>    # 出一张复习卡（遮答案独立重做）
+node scripts/review-cycle.mjs done <id> --result correct   # 做对 → 间隔升一级
+node scripts/review-cycle.mjs done <id> --result wrong     # 做错 → 间隔重置，回 explain-mistake
+```
+
+复习规则（脚本内置状态机）：
+- 每次复习先遮答案让学生**独立重做**
+- 做对 → 间隔升一级（1→3→7→15→30 天）
+- 做错 → 间隔重置为 1 天，并重新走 `explain-mistake`
+- 连续做对 5 次 → 自动标记「已掌握」，脚本不再安排复习（降频）
+
+> 由脚本负责「何时该复习」，AI 只需在复习时调用 `card` 出题、根据学生自评调用 `done` 推进，不需要靠记忆推算间隔。
 
 ## 输出模板
 
@@ -79,5 +101,7 @@ description: 错题本管理（记录、归类、回顾）。当用户想登记�
 ```
 
 ## 说明
-- 若用户有本地存储偏好（如 Markdown 文件、Notion、Obsidian），可配合脚本 `scripts/mistake-book.mjs` 把记录持久化到 `data/mistake-book.json`。
+- 遗忘曲线闭环的核心脚本是 `scripts/review-cycle.mjs`（`add / due / card / done / list / stats / rm`），数据存于 `data/mistake-book.json`。
+- 另有简易版 `scripts/mistake-book.mjs`（`add / list / get / rm / stats`）可做轻量记录，二者共用同一数据文件。
+- 若用户有本地存储偏好（如 Markdown 文件、Notion、Obsidian），可在脚本输出基础上导出。
 - 错题的「讲解」部分由 `explain-mistake` 完成，本子技能只负责沉淀、归类与回顾调度。

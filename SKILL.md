@@ -1,7 +1,7 @@
 ---
 name: ai-tutor
 description: AI 学习助教。当用户需要讲解错题、解释知识点、制定学习计划、生成测验或整理错题本时使用。覆盖数学、物理、化学、生物、英语、语文、历史、地理等学科，适合初高中及大学基础课程。
-version: 1.0.0
+version: 1.1.0
 ---
 
 # AI 学习助教（ai-tutor）
@@ -34,7 +34,24 @@ version: 1.0.0
 2. 收集必要信息（题目原文、选项、学生思路、已有知识水平）
 3. 按子技能流程完成教学
 4. 结束时给学生一个可执行的下一步（练习 / 复述 / 复习）
+5. 若涉及错题沉淀 / 复习调度 → 调用脚本把数据真正落盘（见下表）
 ```
+
+## 可调用脚本（数据链）
+
+本技能不是只有提示词，还提供一套可运行的命令行脚本，用于把「讲解 → 记录 → 遗忘曲线调度 → 到期复习 → 掌握」真正闭环。数据统一存于 `data/mistake-book.json`。
+
+| 步骤 | 命令 | 说明 |
+|---|---|---|
+| 看遗忘间隔 | `node scripts/review-cycle.mjs schedule` | 打印遗忘曲线间隔（1/3/7/15/30 天） |
+| 登记错题 | `node scripts/review-cycle.mjs add --subject ... --title "..." --answer "..." --type ... --tags ... --importance ...` | 写入错题本并自动安排首次复习 |
+| 查到期复习 | `node scripts/review-cycle.mjs due [--subject 数学] [--date YYYY-MM-DD]` | 列出今天（或指定日）到期的错题 |
+| 出复习卡 | `node scripts/review-cycle.mjs card <id>` | 生成一张复习卡（先遮答案独立重做） |
+| 自评推进 | `node scripts/review-cycle.mjs done <id> --result correct\|wrong` | 做对→间隔升一级；做错→重置间隔回 `explain-mistake` |
+| 查看/统计 | `node scripts/review-cycle.mjs list` / `stats` | 按学科 / 掌握状态查看，统计到期量 |
+| 删除 | `node scripts/review-cycle.mjs rm <id>` | 移除一条错题 |
+
+> **掌握状态机**：连续做对按 1→3→7→15→30 天递增间隔，连续做对 5 次自动标记「已掌握」并降频；做错则重置间隔为 1 天。全部由脚本计算，AI 无需靠记忆推算复习日期。
 
 ## 子技能
 
@@ -60,6 +77,7 @@ version: 1.0.0
 
 - 用户可能发来错题照片、截图、PDF。优先用 `scripts/parse-image.mjs` 提取文字；若无法识别，礼貌请用户把题目文字粘过来。
 - 涉及需要计算的题，若题干缺数据，先请用户补充，不要臆造数字。
+- 数据落盘与复习调度统一走 `scripts/review-cycle.mjs`（见上表），`scripts/mistake-book.mjs` 提供轻量增删查。
 
 ## 边界与安全
 
