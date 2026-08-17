@@ -44,14 +44,18 @@ version: 1.2.0
 | 步骤 | 命令 | 说明 |
 |---|---|---|
 | 看遗忘间隔 | `node scripts/review-cycle.mjs schedule` | 打印遗忘曲线间隔（1/3/7/15/30 天） |
-| 登记错题 | `node scripts/review-cycle.mjs add --subject ... --title "..." --answer "..." --type ... --tags ... --importance ...` | 写入错题本并自动安排首次复习 |
+| 看学科维度 | `node scripts/review-cycle.mjs dimensions --subject 数学` | 查看该学科内置知识点/难度/题型骨架，登记时据此归类 |
+| 登记错题 | `node scripts/review-cycle.mjs add --subject ... --knowledge 知识点 --difficulty 易中难 --qtype 题型 --title "..." --answer "..." --type ... --tags ... --importance ...` | 写入错题本并自动安排首次复习（优先用维度字段归类） |
 | 查到期复习 | `node scripts/review-cycle.mjs due [--subject 数学] [--date YYYY-MM-DD]` | 列出今天（或指定日）到期的错题 |
-| 出复习卡 | `node scripts/review-cycle.mjs card <id>` | 生成一张复习卡（先遮答案独立重做） |
-| 自评推进 | `node scripts/review-cycle.mjs done <id> --result correct\|wrong` | 做对→间隔升一级；做错→重置间隔回 `explain-mistake` |
-| 查看/统计 | `node scripts/review-cycle.mjs list` / `stats` | 按学科 / 掌握状态查看，统计到期量 |
+| 出复习卡 | `node scripts/review-cycle.mjs card <id>` | 生成一张复习卡（先独立重做，掩答案） |
+| 自评推进 | `node scripts/review-cycle.mjs done <id> --result correct\|wrong [--exam]` | 做对→间隔升一级；做错→重置间隔；`--exam`=闭卷重做判分，客观性更高 |
+| 查看/统计 | `node scripts/review-cycle.mjs list [--difficulty 难] [--qtype 计算]` / `stats` | 按学科 / 难度 / 题型 / 掌握状态查看，统计到期量 |
 | 删除 | `node scripts/review-cycle.mjs rm <id>` | 移除一条错题 |
+| 画图（数形结合） | `node scripts/plot.mjs fn --fn "-(x^2)+4x"` | 数学讲解涉及函数/几何时画坐标系图：`fn` 显式函数、`impl` 隐式曲线（圆/椭圆/直线）、`pts` 点线段多边形；可加 `--svg` 导出图片，`--xmin/--xmax/--ymin/--ymax` 固定范围 |
 
 > **掌握状态机**：连续做对按 1→3→7→15→30 天递增间隔，连续做对 5 次自动标记「已掌握」并降频；做错则重置间隔为 1 天。全部由脚本计算，AI 无需靠记忆推算复习日期。
+>
+> **维度骨架**：登记错题时用 `--knowledge`（知识点，优先选学科内置）、`--difficulty`（易/中/难）、`--qtype`（题型）归类，代替仅打扁平 tag，方便后续按维度聚合生成「错题地图」。运行 `dimensions --subject <学科>` 可查看内置骨架。
 
 ## 子技能
 
@@ -72,6 +76,18 @@ version: 1.2.0
 - **历史/地理/生物**：强调因果链、时间轴、概念辨析；多用脉络图。
 
 > 若用户未指明学科，先问一句「这是哪个学科 / 你现在的年级」，再开始讲。
+
+## 数形结合：讲数学要「画图」
+
+数学（函数、几何、三角）光靠文字很难讲清。凡涉及以下场景，**必须先调用 `scripts/plot.mjs` 画一张坐标系图**内嵌到讲解里，再配合文字分步讲：
+
+- **函数/图像**：一次/二次函数、增减性、对称轴、最值、交点 → `fn --fn "-(x^2)+4x"`，或 `--xmin/--xmax/--ymin/--ymax` 固定范围聚焦。
+- **几何曲线**：圆、椭圆、双曲线、直线 → `impl --impl "x^2+y^2-9"`。
+- **多边形/线段**：三角形、勾股/面积示意、坐标法 → `pts --pts "0,0 4,0 4,3"`。
+
+用法速查：`node scripts/plot.mjs fn --fn "<(x)>"`；要保存成图片给用户看，加 `--svg ./out.svg`。若用户环境无 Node 或画图失败，退而用纯文字 + ASCII 简单示意，但优先用脚本保证准确。
+
+> 图要「标出关键点」：如二次函数顶点、对称轴、与坐标轴交点；配合文字在旁边写清这些点怎么算出来。
 
 ## 关于图片与文件
 

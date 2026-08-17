@@ -7,15 +7,18 @@
  *
  * 用法：
  *   node scripts/review-cycle.mjs schedule            # 打印遗忘间隔表（1/3/7/15/30 天）
+ *   node scripts/review-cycle.mjs dimensions            # 查看内置学科维度（难度/题型/知识点）
+ *   node scripts/review-cycle.mjs dimensions --subject 数学
  *   node scripts/review-cycle.mjs add \
- *       --subject 数学 --chapter 二次函数 --title "..." \
+ *       --subject 数学 --knowledge 二次函数 --difficulty 中 --qtype 计算 --title "..." \
  *       --mistake "..." --answer "..." --type 思路型 \
  *       --tags "判别式,数形结合" --importance high
  *   node scripts/review-cycle.mjs due                 # 今天到期待复习（可 --date 指定，--subject 过滤）
  *   node scripts/review-cycle.mjs card <id>           # 出一张复习卡（遮答案，先让学生独立重做）
- *   node scripts/review-cycle.mjs done <id> --result correct|wrong
+ *   node scripts/review-cycle.mjs done <id> --result correct|wrong [--exam]
  *                                                   # 自评推进：做对→升间隔/掌握；做错→重置间隔
- *   node scripts/review-cycle.mjs list [--subject 数学] [--mastery 复习中|将掌握|已掌握]
+ *                                                   # --exam 表示"盖答案重做后判分"的闭卷模式
+ *   node scripts/review-cycle.mjs list [--subject 数学] [--knowledge 函数] [--difficulty 难] [--qtype 计算] [--mastery 复习中|将掌握|已掌握]
  *   node scripts/review-cycle.mjs stats
  *   node scripts/review-cycle.mjs rm <id>
  *
@@ -36,6 +39,29 @@ const DATA_FILE = process.env.MISTAKE_BOOK_FILE
 const SCHEDULE = [1, 3, 7, 15, 30]; // 连续做对的复习间隔（天）
 const MASTER_IDX = SCHEDULE.length; // 达到该索引即视为已掌握
 const MASTERY = { LEARING: "复习中", FINAL: "将掌握", MASTERED: "已掌握" };
+
+/* ---------- 内置学科维度（知识点 / 难度 / 题型） ----------
+ * 用于给错题挂结构化的归类骨架，替代「只能打一堆扁平 tag」的旧模式。
+ * AI 登记错题时优先从下表选择，保证「错题地图」有统一的轴可聚合。
+ * 难度：易 / 中 / 难
+ * 题型：选择 / 填空 / 计算 / 证明 / 简答 / 应用 / 实验 / 阅读 / 听力 / 口语 / 写作
+ */
+const DIFFICULTY = ["易", "中", "难"];
+const QUESTION_TYPES = ["选择", "填空", "计算", "证明", "简答", "应用", "实验", "阅读", "听力", "口语", "写作"];
+// 常见学科的知识点骨架（可扩展，AI 也可自由补充 --knowledge）
+const KNOWLEDGE_MAP = {
+  "数学": ["代数", "函数", "几何", "三角", "数列", "概率统计", "向量", "解析几何", "立体几何"],
+  "物理": ["力学", "热学", "电磁学", "光学", "原子物理", "振动与波"],
+  "化学": ["化学计量", "物质结构", "化学反应", "有机化学", "实验探究"],
+  "生物": ["细胞", "遗传", "代谢", "生态", "稳态调节"],
+  "英语": ["词汇", "语法", "听力", "阅读", "写作", "口语"],
+  "语文": ["文言文", "现代文阅读", "古诗词", "作文", "基础运用"],
+  "历史": ["中国古代史", "中国近现代史", "世界史", "史学方法"],
+  "地理": ["自然地理", "人文地理", "区域地理", "地图与读图"],
+};
+function suggestKnowledge(subject) {
+  return KNOWLEDGE_MAP[subject] || [];
+}
 
 /* ---------- 存储 ---------- */
 function ensureFile() {
@@ -102,10 +128,24 @@ function schedule() {
 function add(args) {
   const db = load();
   const created = todayStr();
+  const subject = args.subject || "未分类";
+  // 难度归一化（易/中/难），非法值回落"中"
+  const difficulty = DIFFICULTY.includes(args.difficulty) ? args.difficulty : "中";
+  // 知识点：优先显式 --knowledge；未提供但学科有骨架时，从 --chapter 兜底
+  const knowledge = args.knowledge
+    ? args.knowledge.trim()
+    : (args.chapter ? args.chapter.trim() : "");
+  const knowledgeCandidates = {
+    knows: knowledge.split(/[,，/]/).map((s) => s.trim()).filter(Boolean),
+    suggest: suggestKnowledge(subject).slice(0, 5),
+  };
   const record = normalize({
     id: db.records.length ? Math.max(...db.records.map((r) => r.id)) + 1 : 1,
-    subject: args.subject || "未分类",
+    subject,
     chapter: args.chapter || "",
+    knowledge,            // 结构化知识点（第二级维度，替代/吸附于 --chapter）
+    difficulty,           // 第二级维度：易 / 中 / 难
+    qtype: args.qtype || "未知", // 第二级维度：题型
     title: args.title || "",
     mistake: args.mistake || "",
     answer: args.answer || "",
@@ -122,8 +162,26 @@ function add(args) {
   });
   db.records.push(record);
   save(db);
-  console.log(`已收录第 ${record.id} 条错题（${record.subject}/${record.chapter || "?"}）。`);
+  console.log(`已收录第 ${record.id} 条错题（${record.subject}/${record.knowledge || record.chapter || "?"} · ${record.difficulty} · ${record.qtype}）。`);
   console.log(`下次复习：${record.nextDue}（${SCHEDULE[0]} 天后）。`);
+  // 提示可用知识点候选，帮助 AI/用户挂更统一的维度
+  if (knowledgeCandidates.knows.length && knowledgeCandidates.suggest.length) {
+    console.log(`本学科常见知识点：${knowledgeCandidates.suggest.join(" / ")}`);
+  }
+}
+
+/* ---------- 命令：查看可用的维度字典 ---------- */
+function dimensions(args) {
+  console.log(`难度：${DIFFICULTY.join(" / ")}`);
+  console.log(`题型：${QUESTION_TYPES.join(" / ")}`);
+  const subject = args.subject || null;
+  if (subject) {
+    const k = suggestKnowledge(subject);
+    console.log(`知识点（${subject}）：${k.length ? k.join(" / ") : "（暂无内置，可自定义 --knowledge）"}`);
+  } else {
+    console.log("知识点：按学科内置（如 数学→函数/几何/概率统计…），也可用 --knowledge 自定义。");
+    console.log("提示：运行  dimensions --subject 数学  可看该学科的知识点骨架。");
+  }
 }
 
 /* ---------- 命令：到期查询 ---------- */
@@ -161,12 +219,15 @@ function card(id) {
     return;
   }
   console.log("────────────────────────");
-  console.log(`复习卡 #${r.id} · ${r.subject}/${r.chapter || "-"} [${r.importance}]`);
-  console.log(`错因:${r.type}  标签:${(r.tags || []).join(",") || "-"}`);
+  console.log(`复习卡 #${r.id} · ${r.subject}/${r.knowledge || r.chapter || "-"} [${r.importance}]`);
+  console.log(`错因:${r.type}  难度:${r.difficulty || "-"}  题型:${r.qtype || "-"}  标签:${(r.tags || []).join(",") || "-"}`);
   console.log("────────────────────────");
   console.log(`题干：${r.title}`);
   console.log();
-  console.log("先独立重做，掩住下方答案。完成后运行：");
+  console.log("先独立重做，掩住下方答案。");
+  console.log("推荐闭卷判分（盖住答案重做后，对照判分，客观性更高）：");
+  console.log(`  node scripts/review-cycle.mjs done ${r.id} --result correct|wrong --exam`);
+  console.log("若只想快速凭感觉自评，可省略 --exam：");
   console.log(`  node scripts/review-cycle.mjs done ${r.id} --result correct|wrong`);
   console.log();
   console.log(`答案：${r.answer}`);
@@ -174,7 +235,7 @@ function card(id) {
 }
 
 /* ---------- 命令：自评推进（遗忘曲线状态机） ---------- */
-function done(id, result) {
+function done(id, result, exam) {
   const db = load();
   const r = db.records.find((x) => x.id === Number(id));
   if (!r) {
@@ -186,6 +247,12 @@ function done(id, result) {
     return;
   }
   const today = todayStr();
+  // exam-mode：闭卷重做判分；记录 lastExamAt 供溯源，客观性比"凭感觉自评"更高
+  if (exam) {
+    r.lastExamAt = today;
+    r.examCount = (r.examCount || 0) + 1;
+    console.log("· 闭卷（exam-mode）重做判分已记录。");
+  }
   r.lastReviewed = today;
   r.reviewCount = (r.reviewCount || 0) + 1;
 
@@ -218,6 +285,10 @@ function list(args) {
   let rows = db.records.map(normalize);
   if (args.subject) rows = rows.filter((r) => r.subject === args.subject);
   if (args.mastery) rows = rows.filter((r) => r.mastery === args.mastery);
+  // 新增的维度过滤
+  if (args.knowledge) rows = rows.filter((r) => (r.knowledge || r.chapter || "").includes(args.knowledge));
+  if (args.difficulty) rows = rows.filter((r) => r.difficulty === args.difficulty);
+  if (args.qtype) rows = rows.filter((r) => r.qtype === args.qtype);
   rows.sort((a, b) => importantLevel(b.importance) - importantLevel(a.importance) || a.id - b.id);
   if (!rows.length) {
     console.log("（暂无匹配的错题）");
@@ -226,7 +297,7 @@ function list(args) {
   console.log(`共 ${rows.length} 条：`);
   for (const r of rows) {
     const due = r.nextDue ? r.nextDue : "—";
-    console.log(`  [#${r.id}] ${r.subject}/${r.chapter || "-"} | ${r.title} | ${r.mastery} | 下次:${due}`);
+    console.log(`  [#${r.id}] ${r.subject}/${r.knowledge || r.chapter || "-"} | ${r.title} | ${r.difficulty || "-"}/${r.qtype || "-"} | ${r.mastery} | 下次:${due}`);
   }
 }
 function stats() {
@@ -263,16 +334,17 @@ function main() {
   try {
     switch (cmd) {
       case "schedule": schedule(); break;
+      case "dimensions": dimensions(args); break;
       case "add": add(args); break;
       case "due": due(args); break;
       case "card": card(args._[1]); break;
-      case "done": done(args._[1], args.result); break;
+      case "done": done(args._[1], args.result, Object.prototype.hasOwnProperty.call(args, "exam")); break;
       case "list": list(args); break;
       case "stats": stats(); break;
       case "rm": rm(args._[1]); break;
       default:
         console.log(`未知命令：${cmd || "(空)"}`);
-        console.log("支持：schedule / add / due / card <id> / done <id> --result correct|wrong / list / stats / rm <id>");
+        console.log("支持：schedule / dimensions / add / due / card <id> / done <id> --result correct|wrong [--exam] / list / stats / rm <id>");
         process.exit(1);
     }
   } catch (e) {

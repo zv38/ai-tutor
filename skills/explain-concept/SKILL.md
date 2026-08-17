@@ -43,6 +43,18 @@ description: Explain concepts step by step. Use when a user wants to understand 
 - 公式给出后，说明每个符号的含义和单位。
 - 不超纲：按学生年级决定引入多少深度，不一次灌太多。
 
+## 数形结合：能画图就别只靠文字
+
+- 涉及**函数、几何、三角**（如二次函数图像、增减性、对称轴、最值、圆、三角形）时，先用脚本画一张坐标系图：
+  ```
+  node scripts/plot.mjs fn --fn "-(x^2)+4x"            # 显式函数
+  node scripts/plot.mjs impl --impl "x^2+y^2-9"         # 圆/椭圆/双曲线/直线
+  node scripts/plot.mjs pts --pts "0,0 4,0 4,3"         # 三角形/多边形/线段
+  ```
+- 图要标出关键点（顶点、对称轴、与轴交点、圆心/半径等），文字在旁边写清这些点怎么算出来。
+- 需要保存成图片给用户看：加 `--svg ./out.svg`。
+- 若环境无 Node，退而用 ASCII/文字示意，但优先用脚本保证图准确。
+
 ## 输出模板
 
 ```

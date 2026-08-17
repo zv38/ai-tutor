@@ -82,23 +82,70 @@ ai-tutor/
 └── LICENSE                     # MIT
 ```
 
-## 使用方式
+## 快速上手（Claude Code · 推荐）
 
-把本技能包放入 AI 代理可访问的技能目录（如 Claude Agent Skills、Cursor Rules 或自定义 Agent 的 skills 目录），当用户发出学习相关请求时，代理会自动匹配并调用对应子技能。
+ai-tutor 是给 **Claude Code** 设计的一套 Agent Skills。安装后，Claude 会在对话中自动识别你的学习请求并调用对应子技能。你无需任何配置。
+
+### 第 1 步：一键安装
+
+在 `ai-tutor` 仓库根目录运行：
+
+```bash
+# macOS / Linux
+bash install.sh
+
+# Windows
+install.cmd
+```
+
+这会把这个技能包装到 `~/.claude/skills/ai-tutor/`（用户级，所有项目可用）。想只在当前项目用，加 `--project`；想卸载，加 `--uninstall`。
+
+> 你也可以手动安装：把本仓库整个文件夹复制到 `~/.claude/skills/ai-tutor/` 即可，效果一样。
+
+### 第 2 步：开始学习
+
+在任意目录启动 Claude Code，直接用自然语言对话即可：
+
+| 你说的话 | 会触发的子技能 |
+|---|---|
+| "帮我讲讲这道数学题为什么错了" | `explain-mistake` 错题讲解 |
+| "二次函数对称轴怎么理解？" | `explain-concept` 知识点讲解 |
+| "帮我做几道化学题巩固一下" | `quiz` 测验 |
+| "列一份一周的复习计划" | `review-plan` 学习计划 |
+| "把这题记进错题本，安排复习" | `mistake-book` 错题本 |
+
+讲解过程中，AI 会自动把错题写入本机错题本并安排遗忘曲线复习，到期主动提醒你复习。
+
+### 第 3 步（可选）：驱动复习闭环
+
+复习由脚本计算，AI 调用即可，你也可以手动用命令推进（见下方"辅助脚本"）。
+
+## 兼容性说明
+
+- **Claude Code（Agent Skills）**：⭐ 官方推荐，`~/.claude/skills/` 是原生支持，体验最佳。
+- **Cursor / 其他支持 Skills 的 Agent**：ai-tutor 的 `SKILL.md` 是标准 Agent Skill 结构，同样可以放入对应技能目录，但触发与配置方式因工具而异，请参考各工具的技能接入文档。
+- **独立使用（不依赖 AI 代理）**：`scripts/` 下的命令可在纯 Node.js 环境独立运行，用于错题本管理；但"讲解、出题、规划"类能力依赖 AI 模型，无法离线提供。
 
 ## 辅助脚本
 
 ```bash
-# 数据链核心（遗忘曲线 + 掌握状态机，推荐）
+# 数据链核心（遗忘曲线 + 掌握状态机 + 学科维度，推荐）
 node scripts/review-cycle.mjs schedule
-node scripts/review-cycle.mjs add --subject 数学 --chapter 二次函数 --title "..." --mistake "..." --answer "..." --type 思路型 --tags "二次函数,判别式" --importance high
+node scripts/review-cycle.mjs dimensions --subject 数学      # 查看该学科的知识点/难度/题型骨架
+node scripts/review-cycle.mjs add --subject 数学 --knowledge 二次函数 --difficulty 中 --qtype 计算 --title "..." --mistake "..." --answer "..." --type 思路型 --tags "二次函数,判别式" --importance high
 node scripts/review-cycle.mjs due --subject 数学
 node scripts/review-cycle.mjs card 1
-node scripts/review-cycle.mjs done 1 --result correct
-node scripts/review-cycle.mjs list / stats / rm 1
+node scripts/review-cycle.mjs done 1 --result correct --exam # 闭卷重做判分（客观性更高）；快速自评省略 --exam
+node scripts/review-cycle.mjs list --subject 数学 --difficulty 难
+node scripts/review-cycle.mjs stats / rm 1
 
 # 解析错题图片（可选 OCR）
 node scripts/parse-image.mjs ./a.png
+
+# 数学可视化：讲函数/几何时画图（数形结合）
+node scripts/plot.mjs fn --fn "-(x^2)+4x"             # 二次函数 y=-x²+4x
+node scripts/plot.mjs impl --impl "x^2+y^2-9"         # 半径 3 的圆
+node scripts/plot.mjs pts --pts "0,0 4,0 4,3" --svg ./img/triangle.svg  # 直角三角形并导出SVG
 
 # 错题本轻量版（与 review-cycle 共用数据）
 node scripts/mistake-book.mjs add --subject 数学 --chapter 二次函数 --title "..." --mistake "..." --answer "..." --type 思路型 --tags "二次函数,判别式" --importance high

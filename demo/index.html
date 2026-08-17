@@ -159,10 +159,41 @@
   .curve { display:flex; align-items:flex-end; gap:6px; height:46px; margin-top:6px; }
   .curve .bn { flex:1; border-radius:6px 6px 0 0; background:linear-gradient(180deg, var(--accent), var(--accent-2)); opacity:.85; transition: height .6s cubic-bezier(.2,.8,.2,1); }
   .curve .bn.empty { background:var(--line); opacity:.6; }
+
+  /* ===== 演示模式横幅 ===== */
+  .demo-banner {
+    display:none; align-items:flex-start; gap:12px; margin-bottom:20px; padding:14px 16px;
+    border-radius:var(--radius-sm); border:1px solid rgba(217,138,90,0.4);
+    background: linear-gradient(135deg, rgba(217,138,90,0.16), rgba(217,138,90,0.05));
+    box-shadow: var(--shadow-sm); font-size:13px; line-height:1.6; color:var(--ink);
+  }
+  .demo-banner.show { display:flex; }
+  .demo-banner .badge { flex:none; font-size:11px; font-weight:700; color:#fff; background:var(--warn); padding:3px 10px; border-radius:999px; white-space:nowrap; margin-top:1px; }
+  .demo-banner .b-text { flex:1; }
+  .demo-banner .b-text b { color: var(--warn); }
+  .demo-banner .b-cta { flex:none; font-size:11px; font-weight:650; color:var(--warn); border:1px solid rgba(217,138,90,0.55); padding:5px 12px; border-radius:999px; cursor:pointer; background:rgba(255,255,255,0.4); transition:all .2s; white-space:nowrap; }
+  .demo-banner .b-cta:hover { background:var(--warn); color:#fff; }
+
+  /* ===== 首次打开介绍弹层 ===== */
+  .intro .modal { max-width:520px; }
+  .intro .m-tag { display:inline-block; font-size:11px; font-weight:700; color:var(--accent); background:var(--accent-soft); padding:3px 10px; border-radius:999px; margin-bottom:12px; }
+  .intro .m-list { margin:0 0 4px; padding-left:2px; display:flex; flex-direction:column; gap:10px; }
+  .intro .m-row { display:flex; gap:11px; align-items:flex-start; font-size:13px; line-height:1.6; color:var(--ink); }
+  .intro .m-row .m-dot { flex:none; width:26px; height:26px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#fff; background:linear-gradient(135deg, var(--accent), var(--accent-2)); }
+  .intro .m-row.g .m-dot { background:#4c9a7a; }
+  .intro .m-row.w .m-dot { background:var(--warn); }
+  .intro .m-row b { color: var(--ink); }
+  .intro .m-note { margin-top:14px; font-size:12px; color:var(--ink-soft); background:var(--accent-soft); border:1px solid rgba(108,92,231,0.15); padding:10px 12px; border-radius:10px; line-height:1.6; }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="demo-banner" id="demoBanner">
+    <span class="badge">演示模式</span>
+    <div class="b-text">这是 <b>静态原型页</b>，当前输出来自内置病例，不是真实 AI。要获得真实讲解：右上角齿轮接入你自己的 OpenAI 兼容模型，或在 <a href="https://github.com/zv38/ai-tutor" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">Claude Code</a> 中安装本技能。</div>
+    <span class="b-cta" id="bannerConfig">去配置模型</span>
+  </div>
+
   <header>
     <div class="brand">
       <div class="brand-mark"></div>
@@ -226,6 +257,25 @@
   </div>
 </div>
 
+<!-- 首次打开介绍 -->
+<div class="overlay intro" id="introOverlay">
+  <div class="modal">
+    <span class="m-tag">AI 学习助教 · 原型演示</span>
+    <h3>先看清楚：这是一个演示原型，不是真实 AI</h3>
+    <div class="sub" style="margin-bottom:16px">这个网页是用来「演示效果」的静态原型，方便你在零配置、零成本下直观感受技能能做什么。</div>
+    <div class="m-list">
+      <div class="m-row"><div class="m-dot">1</div><div>点左侧<b>内置病例</b>，即可看一遍「先诊断错因 → 分步讲清思路 → 点亮错题地图」的完整效果。</div></div>
+      <div class="m-row w"><div class="m-dot">2</div><div>当前效果是<b>预制的演示数据</b>，不是 AI 实时讲解，所有内容不会上传。</div></div>
+      <div class="m-row g"><div class="m-dot">3</div><div>想要<b>真实讲解</b>：右上角齿轮接入你自己的 OpenAI 兼容模型即可。</div></div>
+    </div>
+    <div class="m-note"><b>真正的完整能力</b>在 Claude Code 里：错题讲解、遗忘曲线复习、学习计划、测验一应俱全，且全自动闭环。GitHub 一键安装：<b>zv38/ai-tutor</b>。</div>
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn" id="introSkip">先看看演示</button>
+      <button class="btn pri" id="introSetup">配置真实模型</button>
+    </div>
+  </div>
+</div>
+
 <!-- 配置面板 -->
 <div class="overlay" id="configOverlay">
   <div class="modal">
@@ -257,6 +307,7 @@
 const STORE_KEY = "ai_tutor_demo_cfg";
 const REC_KEY = "ai_tutor_demo_records";
 const LIT_KEY = "ai_tutor_demo_lit";
+const INTRO_KEY = "ai_tutor_demo_intro_seen";
 
 function loadConfig() {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(_) { return {}; }
@@ -508,6 +559,9 @@ function updateAiStatus() {
   const chip = document.getElementById("aiStatus");
   chip.classList.toggle("on", on);
   document.getElementById("aiStatusText").textContent = on ? `已接入 · ${cfg.model}` : "演示模式";
+  // 显眼的演示横幅：未接入真实模型时展示，接入后隐藏
+  const banner = document.getElementById("demoBanner");
+  banner.classList.toggle("show", !on);
 }
 
 function openConfig() {
@@ -538,12 +592,28 @@ document.getElementById("clearConfig").addEventListener("click", ()=>{
 
 sendBtn.addEventListener("click", runFree);
 
+/* ============ 演示横幅 / 首次打开弹层 ============ */
+document.getElementById("bannerConfig").addEventListener("click", openConfig);
+document.getElementById("introSetup").addEventListener("click", () => {
+  localStorage.setItem(INTRO_KEY, "1");
+  document.getElementById("introOverlay").classList.remove("show");
+  openConfig();
+});
+document.getElementById("introSkip").addEventListener("click", () => {
+  localStorage.setItem(INTRO_KEY, "1");
+  document.getElementById("introOverlay").classList.remove("show");
+});
+
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 buildGraph();
 renderPresets();
 renderRecords();
 updateAiStatus();
+// 首次打开：说明这是演示原型，最大程度避免「以为演示就是真 AI」的预期落差
+if (!localStorage.getItem(INTRO_KEY)) {
+  document.getElementById("introOverlay").classList.add("show");
+}
 </script>
 </body>
 </html>
