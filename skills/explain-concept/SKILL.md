@@ -4,82 +4,82 @@ parent: ai-tutor
 description: Explain concepts step by step. Use when a user wants to understand a concept, definition, formula, theorem, or principle — "what does this mean / how does this work". Outputs: concept breakdown + analogies + easy-to-confuse comparison + self-check. / 知识点讲解。当用户想理解某个概念、定义、公式、定理、规律，或「这个词是什么意思、这个原理怎么理解」时使用。产物：概念拆解 + 类比理解 + 易混辨析 + 自测。
 ---
 
-# 知识点讲解（explain-concept）
+# Explain Concepts (explain-concept)
 
-把一个抽象概念讲得「像大白话一样好懂」。核心是用**学生已有的经验**搭桥，而不是再抄一遍定义。
+Make an abstract concept as easy to understand as plain language. The core idea is to bridge with **what the student already knows**, rather than re-copying the definition.
 
-## 触发条件
+## Triggers
 
-- 用户问「XX 是什么意思 / 怎么理解 / 为什么是这样」
-- 用户想搞懂某个公式、定理、定义的来龙去脉
-- 用户预习 / 复习时遇到讲不清的知识点
+- The user asks "what does XX mean / how do I understand it / why is it like this"
+- The user wants to understand the how and why of a formula, theorem, or definition
+- The user hits a knowledge point they can't explain clearly while previewing / reviewing
 
-## 教学流程
+## Teaching Flow
 
-### 第 1 步：确认对象与水平
-- 明确要讲的知识点（必要时请用户说清是哪里的、哪个学科）
-- 问一句「你目前学到哪 / 哪里觉得怪」，据此定讲解深度
+### Step 1: Confirm the object and level
+- Make clear the knowledge point to explain (if needed, ask where it comes from / which subject)
+- Ask "where are you in your learning / what feels off", and set the depth accordingly
 
-### 第 2 步：三层结构讲解
-按「是什么 → 为什么 → 怎么用」组织：
+### Step 2: Three-layer explanation
+Organize by "what it is → why → how to use":
 
-1. **一句话定义**：用大白话讲清它是什么（先给直觉，再给严谨表述）
-2. **类比 / 图示**：用一个生活里熟悉的例子或清晰图示，把抽象变具体
-3. **为什么成立**：讲清背后的原因或推导，而不是「记住就行」
-4. **怎么用 / 常见坑**：给出典型用法、适用条件、以及最常踩的坑
+1. **One-sentence definition**: explain what it is in plain words (intuition first, then rigorous statement)
+2. **Analogy / diagram**: use a familiar real-life example or a clear diagram to make the abstract concrete
+3. **Why it holds**: explain the reason or derivation behind it, not just "remember it"
+4. **How to use / common traps**: give typical usage, applicable conditions, and the traps people most often fall into
 
-### 第 3 步：易混辨析
-- 列出与之相近、容易混淆的概念，用对比表格讲清差别
-  （例：质数 vs 合数；位移 vs 路程；volatile 与可见性）
+### Step 3: Easy-to-confuse comparison
+- List nearby, easily-confused concepts and clarify the difference with a comparison table
+  (e.g., prime vs composite; displacement vs distance)
 
-### 第 4 步：自测确认
-- 给学生 1-2 个判断/填空小问题，让其用自己的话复述
-- 复述正确 → 确认掌握；有偏差 → 针对偏差再讲一遍
+### Step 4: Self-check
+- Give the student 1-2 true/false or fill-in questions to answer in their own words
+- Correct restatement → confirm mastery; deviation → re-explain the specific gap
 
-## 讲解规范
+## Style
 
-- 术语第一次出现时，紧跟一句大白话解释，再给正式定义。
-- 优先生活类比、图示、数形结合；避免堆术语。
-- 公式给出后，说明每个符号的含义和单位。
-- 不超纲：按学生年级决定引入多少深度，不一次灌太多。
+- The first time a term appears, follow it with a plain-language explanation before the formal definition.
+- Prefer real-life analogies, diagrams, and graph-number fusion; avoid jargon stacking.
+- After giving a formula, explain the meaning and unit of each symbol.
+- Don't go beyond the syllabus: decide how deep to go by the student's grade; don't overload at once.
 
-## 数形结合：能画图就别只靠文字
+## Graph-Number Fusion: Draw a Picture Instead of Text Alone
 
-- 涉及**函数、几何、三角**（如二次函数图像、增减性、对称轴、最值、圆、三角形）时，先用脚本画一张坐标系图：
+- For **functions, geometry, trigonometry** (e.g., quadratic graphs, monotonicity, axis of symmetry, extrema, circles, triangles), first draw a coordinate graph with the script:
   ```
-  node scripts/plot.mjs fn --fn "-(x^2)+4x"            # 显式函数
-  node scripts/plot.mjs impl --impl "x^2+y^2-9"         # 圆/椭圆/双曲线/直线
-  node scripts/plot.mjs pts --pts "0,0 4,0 4,3"         # 三角形/多边形/线段
+  node scripts/plot.mjs fn --fn "-(x^2)+4x"            # explicit function
+  node scripts/plot.mjs impl --impl "x^2+y^2-9"         # circle/ellipse/hyperbola/line
+  node scripts/plot.mjs pts --pts "0,0 4,0 4,3"         # triangle/polygon/segment
   ```
-- 图要标出关键点（顶点、对称轴、与轴交点、圆心/半径等），文字在旁边写清这些点怎么算出来。
-- 需要保存成图片给用户看：加 `--svg ./out.svg`。
-- 若环境无 Node，退而用 ASCII/文字示意，但优先用脚本保证图准确。
+- Mark key points on the graph (vertex, axis of symmetry, axis intersections, center/radius, etc.), and write next to it how these points are computed.
+- To save an image for the user: add `--svg ./out.svg`.
+- If the environment has no Node, fall back to ASCII/text sketch, but prefer the script for accuracy.
 
-## 输出模板
+## Output Template
 
 ```
-【一句话理解】
-XX 就是 <大白话>
+【One-Sentence Understanding】
+XX is <plain words>
 
-【打个比方】
-<生活中的类比或图示>
+【Analogy】
+<real-life analogy or diagram>
 
-【为什么是这样】
-<背后原因 / 推导>
+【Why It's Like This】
+<reason / derivation>
 
-【怎么用 · 常见坑】
-- 适用条件：<...>
-- 最常踩的坑：<...>
+【How to Use · Common Traps】
+- Applicable conditions: <...>
+- Most common traps: <...>
 
-【易混辨析】
-| 概念 | 区别 |
+【Easy-to-Confuse Comparison】
+| Concept | Difference |
 | ... | ... |
 
-【自测一下】
-<1-2 个小问题，让学生用自己的话答>
+【Self-Check】
+<1-2 small questions for the student to answer in their own words>
 ```
 
-## 注意事项
+## Notes
 
-- 若概念依赖前置知识，先简要回顾前置，再进入正题。
-- 讲完后主动问「还有哪句没懂」，鼓励追问。
+- If the concept depends on prerequisite knowledge, briefly review the prerequisite first, then get to the point.
+- After explaining, proactively ask "is there any sentence you didn't get", and invite follow-up questions.

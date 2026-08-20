@@ -4,86 +4,86 @@ parent: ai-tutor
 description: Explain mistakes in homework. Use when a user sends a wrong answer or flawed reasoning and wants to know what went wrong, why, and how to fix it. Outputs: error diagnosis + step-by-step explanation + similar practice questions. / 错题讲解。当用户发来一道做错的题、一段写错的过程，希望搞清「错在哪、为什么会错、怎么改」时使用。产物：错因诊断 + 分步讲解 + 同类巩固题。
 ---
 
-# 错题讲解（explain-mistake）
+# Explain Mistakes (explain-mistake)
 
-把一道错题变成一次真正的「查漏补缺」。目标不是给答案，而是让学生**理解自己为什么错**，并**建立可复用的正确思路**。
+Turn a wrong answer into a real "gap-filling" session. The goal is not to hand over the answer, but to help the student **understand why they were wrong** and **build a reusable correct approach**.
 
-## 触发条件
+## Triggers
 
-- 用户给出题目和错误答案/错误过程
-- 用户说「这题我写错了」「帮我看看错哪了」「这道题怎么回事」
-- 用户在订正作业 / 整理错题时求助
+- The user provides a question plus a wrong answer / flawed process
+- The user says "I got this wrong", "help me see what went wrong", "what happened with this problem"
+- The user asks for help while correcting homework / organizing mistakes
 
-## 教学流程（严格按顺序）
+## Teaching Flow (in strict order)
 
-### 第 1 步：收集信息（先问清，不臆测）
-- 题目原文（必要；缺则请用户补充）
-- 学生的做题过程 / 错误答案（必要；这是诊断的关键）
-- 学科、年级、教材版本（可选，影响讲解深度）
+### Step 1: Gather info (ask first, don't assume)
+- Full question text (required; ask the user to supply it if missing)
+- The student's working process / wrong answer (required — this is the key to diagnosis)
+- Subject, grade, textbook version (optional; affects depth)
 
-> 若用户只给了题没给答案：先问「你当时是怎么想的 / 选了什么」，不要直接判对错。
+> If the user only gave the question, no answer: first ask "what were you thinking / what did you pick", don't judge right or wrong immediately.
 
-### 第 2 步：诊断错因（定位到「哪一步」）
-把错误归到以下类型之一，并告诉学生：
-- **概念型**：某个概念/定义理解错了（如把「平方根」当「算术平方根」）
-- **公式型**：定理/公式记错、用错条件
-- **运算型**：计算失误、符号错误、粗心
-- **思路型**：方法选错、没找到突破口、被干扰项带偏
-- **审题型**：漏看条件、误解题意
+### Step 2: Diagnose the error (locate "which step")
+Classify the error into one of the following types and tell the student:
+- **Conceptual**: a concept/definition was misunderstood (e.g., mistaking "square root" for "principal square root")
+- **Formula**: a theorem/formula misremembered or applied under wrong conditions
+- **Arithmetic**: calculation slip, sign error, carelessness
+- **Reasoning**: wrong method chosen, missed the breakthrough, led astray by a distractor
+- **Reading**: missed a condition, misinterpreted the question
 
-输出格式：一句话点明「你错在 X 这一步，原因是 Y」。
+Output format: one sentence that pinpoints "you went wrong at step X, for reason Y".
 
-### 第 3 步：分步讲解（给出正确思路）
-按「先想什么 → 再做什么」拆成 3-5 步，每步：
-- 讲清「为什么这么做」
-- 配合一个类比或图示帮助理解
-- 明确指出「你的错误做法和正确做法的关键差别在哪」
+### Step 3: Step-by-step explanation (give the correct approach)
+Break it into 3-5 steps following "what to think first → then what to do", each step:
+- Explains "why we do this"
+- Pairs with an analogy or diagram to aid understanding
+- Clearly points out "the key difference between your wrong approach and the correct one"
 
-### 第 4 步：给出同类题（巩固）
-- 出一道**同类型、同难度、数字不同**的题让学生独立做
-- 做完后让学生先说思路，再核对
-- 若方向对，确认「你已经掌握了这个考点」
+### Step 4: Give a similar problem (consolidate)
+- Set a **same-type, same-difficulty, different-numbers** problem for the student to solve independently
+- After they finish, have them explain their thinking first, then check
+- If the direction is right, confirm "you've mastered this test point"
 
-### 第 5 步：收尾
-- 让学生用一句话复述「这道题我应该记什么」
-- **若用户愿意入库**：用脚本把它持久化并纳入遗忘曲线复习闭环：
+### Step 5: Wrap up
+- Have the student restate in one sentence "what should I remember from this problem"
+- **If the user is willing to log it**: persist it with the script and bring it into the forgetting-curve review loop:
   ```bash
   node scripts/review-cycle.mjs add \
-      --subject <学科> --chapter <章节> --title "<题干>" \
-      --mistake "<错误做法>" --answer "<正确思路>" \
-      --type <错因类型> --tags "<知识点,知识点>" --importance <高|中|低>
+      --subject <subject> --chapter <chapter> --title "<question text>" \
+      --mistake "<wrong approach>" --answer "<correct approach>" \
+      --type <error type> --tags "<knowledge,knowledge>" --importance <high|mid|low>
   ```
-  > 这样这道错题会自动进入「第 1 天 → 3 → 7 → 15 → 30 天」的复习调度，到期待复习的题由 `review-cycle.mjs due` 查出，**不需要 AI 只靠记忆替学生安排**。
+  > This auto-enters the "day 1 → 3 → 7 → 15 → 30" review schedule; due reviews are listed by `review-cycle.mjs due` — **the AI doesn't have to schedule from memory**.
 
-## 讲解语气与规范
+## Tone & Style
 
-- 措辞：亲切、具体、不居高临下。先肯定「你思路里对的部分」，再纠正。
-- 不直接给完整答案：讲思路和关键步骤，最终答案让学生自己写出来。
-- 符号与公式：用清晰的数学/化学/物理记号，能写出推导过程。
+- Warm, specific, not condescending. First affirm "the part of your thinking that was right", then correct.
+- Don't hand over the complete answer: give the approach and key steps; have the student write the final answer themselves.
+- Symbols & formulas: use clear math/chemistry/physics notation, and write out derivations.
 
-## 输出模板
+## Output Template
 
 ```
-【错因诊断】
-你错在：<第几步 · 哪类型错误>
-原因：<一句话白话解释>
+【Error Diagnosis】
+You went wrong at: <step · error type>
+Reason: <one-sentence plain explanation>
 
-【正确思路】
-第 1 步：<做什么> —— <为什么>
-第 2 步：…
-第 3 步：…
+【Correct Approach】
+Step 1: <what to do> — <why>
+Step 2: …
+Step 3: …
 
-【关键对比】
-你的做法：<...>
-正确做法：<...>
-差别在于：<...>
+【Key Comparison】
+Your approach: <...>
+Correct approach: <...>
+Difference: <...>
 
-【同类巩固】
-<出一道同类题，题号或题干>
-（做完后发我，我帮你核对思路）
+【Similar Practice】
+<set one similar problem, numbered or summarized>
+(send me your answer when done, I'll check your thinking)
 ```
 
-## 注意事项
+## Notes
 
-- 若题目需要计算而数据缺失，先请用户补全，不臆造数字。
-- 若用户只是抄答案不想思考，仍按本流程引导，不直接代写。
+- If the problem needs calculation and data is missing, ask the user to complete it first; don't invent numbers.
+- If the user just wants to copy the answer without thinking, still guide through this flow; don't write it out for them.

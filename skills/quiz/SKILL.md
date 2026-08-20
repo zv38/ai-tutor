@@ -4,71 +4,71 @@ parent: ai-tutor
 description: Generate quizzes / practice sets. Use when a user wants practice questions, a mini test, or self-assessment right after learning. Outputs: questions + answers with explanations + grading feedback. / 测验 / 巩固题。当用户要一套练习题、小测、自测题，或刚学完要巩固时使用。产物：题目 + 答案与解析 + 批改反馈。
 ---
 
-# 测验 / 巩固（quiz）
+# Quiz / Consolidation (quiz)
 
-用「测 — 讲 — 补」的方式帮学生检验和巩固掌握程度。核心是**通过做题暴露薄弱点**，再针对性补强。
+Use a "test — teach — fill" loop to check and consolidate the student's mastery. The core is **exposing weak points through problem-solving**, then strengthening them with targeted follow-up.
 
-## 触发条件
+## Triggers
 
-- 用户要练习题、模拟题、小测、自测
-- 用户刚学完一个知识点，想检验掌握程度
-- 用户想查漏补缺（通过做题找盲区）
+- The user wants practice questions, mock questions, a mini test, or self-assessment
+- The user just finished a knowledge point and wants to check mastery
+- The user wants to find blind spots by solving problems (gap-filling)
 
-## 使用流程
+## Usage Flow
 
-### 第 1 步：明确测验目标
-问清 / 判断：
-- **范围**：哪个章节 / 知识点
-- **难度**：基础巩固、中等、偏难（结合年级）
-- **数量**：出几道（默认 5 道）
-- **题型**：选择 / 填空 / 解答（按需混合）
+### Step 1: Clarify the quiz goal
+Ask / determine:
+- **Scope**: which chapter / knowledge points
+- **Difficulty**: basic consolidation, mid, or hard (consider the grade)
+- **Quantity**: how many (default 5)
+- **Question types**: multiple choice / fill-in / free response (mix as needed)
 
-### 第 2 步：出题（一次给出全部）
-- 题目覆盖：① 核心概念 ② 典型运算 ③ 易混辨析 ④ 综合应用
-- 标注每题的考点与难度，但不提前给答案
-- 每题独立、表述清晰、数据自洽（不自相矛盾）
+### Step 2: Set the questions (give all at once)
+- Coverage: ① core concepts ② typical computations ③ easy-to-confuse discrimination ④ integrated application
+- Label each question's test point and difficulty, but don't reveal answers ahead of time
+- Each question independent, clearly worded, internally consistent (no contradictions)
 
-### 第 3 步：批改与反馈
-- 学生作答后，逐题对错给标记
-- 错的题：指出错因（见 `explain-mistake` 的诊断分类），给答案解析
-- 汇总做出「**掌握情况小结**」：哪些考点已掌握、哪些需补强
+### Step 3: Grade & feedback
+- After the student answers, mark each one right or wrong
+- For wrong ones: point out the error cause (see `explain-mistake`'s diagnosis categories) and give the answer explanation
+- Summarize into a "**mastery summary**": which test points are mastered, which need reinforcement
 
-### 第 4 步：针对性补强
-- 针对薄弱考点，再出 1-2 道同类题巩固
-- 给出下一步复习建议（结合 `review-plan`）
+### Step 4: Targeted reinforcement
+- For weak test points, set 1-2 more similar questions to consolidate
+- Give next-step review advice (combine with `review-plan`)
 
-## 出题规范
+## Question-Setting Rules
 
-- 不超纲：按学生年级/教材范围出题。
-- 数据要合理：避免出现负面积、除零等不自洽数据。
-- 难度递进：先易后难，给一点信心再做难题。
-- 给学生留独立思考空间：一次给整套题，不一道一道挤。
+- Don't go beyond the syllabus: set questions within the student's grade/textbook scope.
+- Keep data reasonable: avoid self-inconsistent data like negative areas or division by zero.
+- Escalate difficulty: easy first, hard later; give a bit of confidence before the hard ones.
+- Leave room for independent thinking: give the whole set at once, don't squeeze out one question at a time.
 
-## 输出模板
+## Output Template
 
 ```
-【测验 · 范围 / 题数 / 难度】
-1. <题干>（考点：... · 难度：...）
+【Quiz · Scope / Count / Difficulty】
+1. <question> (test point: ... · difficulty: ...)
 2. ...
-（完成后发答案给我，我逐题批改并小结）
+(send me your answers when done, I'll grade each and summarize)
 
-—— 批改后 ——
-【批改结果】
+—— after grading ——
+【Results】
 1. ✓ / ✗
 2. ...
 
-【易错解析】
-第 2 题：<错因 + 正确做法>
+【Easy-to-Get-Wrong Explanations】
+#2: <error cause + correct approach>
 
-【掌握小结】
-已掌握：<...>
-需补强：<...>
+【Mastery Summary】
+Mastered: <...>
+Needs reinforcement: <...>
 
-【下一步】
-<1-2 道同类题 + 复习建议>
+【Next Steps】
+<1-2 similar questions + review advice>
 ```
 
-## 注意事项
+## Notes
 
-- 若用于考试舞弊（如代考、代写整套答案上传），改为提供「讲解 + 思路引导」，不直接给可提交的完整答案。
-- 学生答对时，可追问一句「为什么这么选」以确认真懂，而非蒙对。
+- If used for exam fraud (e.g., sitting an exam for someone, writing a whole complete answer set to submit), switch to "explanation + approach guidance" instead of handing over a submittable complete answer.
+- When the student answers correctly, follow up with "why did you pick that" to confirm real understanding rather than a lucky guess.

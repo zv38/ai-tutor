@@ -1,64 +1,65 @@
 # Contributing to ai-tutor
 
-感谢你愿意为 ai-tutor 贡献！这个技能包的目标是让 AI 成为更好的学习助教，任何让教学更清晰、覆盖更多学科、数据链更可靠的改进都欢迎。
+Thank you for wanting to contribute to ai-tutor! The goal of this skill pack is to make AI a better learning tutor. Any improvement that makes teaching clearer, covers more subjects, or makes the data chain more reliable is welcome.
 
-## 项目结构
+## Project Structure
 
 ```
 ai-tutor/
-├── SKILL.md                    # 主入口：整体定位、触发条件、教学原则、子技能总览
+├── SKILL.md                    # Main entry: positioning, triggers, teaching principles, sub-skill overview
 ├── skills/
-│   └── <skill-name>/SKILL.md   # 每个子技能一个目录
+│   └── <skill-name>/SKILL.md   # One directory per sub-skill
 ├── scripts/
-│   ├── review-cycle.mjs        # 遗忘曲线 + 掌握状态机（add/due/card/done/list/stats/rm）
-│   ├── parse-image.mjs         # 图片/文件解析（可选 OCR）
-│   └── mistake-book.mjs        # 错题本轻量存储（与 review-cycle 共用数据）
-├── data/                       # 本地学习数据（默认不入库）
+│   ├── review-cycle.mjs        # Forgetting curve + mastery state machine (add/due/card/done/list/stats/rm)
+│   ├── plot.mjs                # Coordinate plotting for math (functions/curves/polygons)
+│   ├── parse-image.mjs         # Image / file parsing (optional OCR)
+│   └── mistake-book.mjs        # Lightweight mistake-book storage (shares data with review-cycle)
+├── data/                       # Local learning data (git-ignored by default)
 └── LICENSE                     # MIT
 ```
 
-## 新增或修改子技能
+## Adding or Modifying a Sub-skill
 
-每个子技能是一个独立的 `SKILL.md`，frontmatter 需符合以下规范：
+Each sub-skill is an independent `SKILL.md`; its frontmatter must follow this spec:
 
 ```yaml
 ---
-name: <skill-name>              # 小写、连字符分隔
-parent: ai-tutor                # 固定为 ai-tutor
-description: <英文描述>。Use when ... / <中文描述>。当用户...时使用。
+name: <skill-name>              # lowercase, hyphen-separated
+parent: ai-tutor                # always ai-tutor
+description: <English description>. Use when ... / <中文描述>。当用户...时使用。
 ---
 ```
 
-- `description` 建议**中英双语**，英文在前（便于英文目录收录），并包含明确的触发场景。
-- 正文按「触发场景 → 工作流步骤 → 产物 → 注意事项」组织，遵循主 `SKILL.md` 的 6 条核心教学原则。
-- 需要落盘/调度复习的功能，优先复用 `scripts/review-cycle.mjs`，不要另造数据格式。
-- 新增脚本时在 `README.md` 的目录结构与命令表中同步登记。
+- `description` should be **bilingual**: English first (for English-language directory indexing), and include a clear trigger scenario.
+- Body content is organized as "trigger scenarios → workflow steps → outputs → notes", following the 6 core teaching principles in the main `SKILL.md`.
+- For features that need persistence / review scheduling, reuse `scripts/review-cycle.mjs` rather than inventing a new data format.
+- When adding a script, also register it in the directory-structure and command tables of `README.md`.
 
-## 本地验证
+## Local Verification
 
-技能包以 Markdown + Node.js 脚本为主，提交前请：
+The skill pack is mostly Markdown + Node.js scripts. Before submitting, please:
 
-1. 用任意 Markdown 预览器检查 frontmatter 与表格渲染正常。
-2. 若改动涉及脚本，运行 `node scripts/review-cycle.mjs --help` 或对应命令验证无语法错误。
-3. 确认 `data/` 下的本地数据没有被提交（应在 `.gitignore` 中排除）。
+1. Check frontmatter and table rendering with any Markdown previewer.
+2. If a script changed, run `node scripts/review-cycle.mjs --help` or the relevant command to verify there are no syntax errors.
+3. Confirm local data under `data/` is not committed (it should be excluded in `.gitignore`).
 
-## 提交信息规范
+## Commit Message Conventions
 
-使用 Conventional Commits，中文描述：
+Use Conventional Commits, in English:
 
 ```
-feat: 新增英语阅读题型讲解子技能
-fix: 修复遗忘曲线在闰年日期计算偏差
-docs: 补充演示说明
-chore: 更新版本号
+feat: add an English reading-question sub-skill
+fix: fix forgetting-curve date drift across leap years
+docs: add demo instructions
+chore: bump version
 ```
 
-## PR 流程
+## PR Process
 
-1. 从 `main` 创建分支：`git checkout -b feat/your-improvement`
-2. 修改并本地验证
-3. 推送分支并提交 Pull Request，说明改动动机与验证方式
+1. Create a branch from `main`: `git checkout -b feat/your-improvement`
+2. Make changes and verify locally
+3. Push the branch and open a Pull Request, explaining the motivation and how you verified the change
 
-## 行为准则
+## Code of Conduct
 
-参与本项目的所有人需遵守 [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)。
+Everyone participating in this project is expected to follow [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).

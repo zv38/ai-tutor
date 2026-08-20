@@ -4,73 +4,73 @@ parent: ai-tutor
 description: Create study / review plans. Use when a user wants a study plan, review schedule, or exam-cram timeline. Outputs: day/week-by-week plan + priorities + review checkpoints. / 学习计划 / 复习安排。当用户要一份学习计划、复习计划、考前冲刺安排、To-Do 时使用。产物：分日/分周计划 + 优先级 + 复盘节点。
 ---
 
-# 学习计划（review-plan）
+# Study Plan (review-plan)
 
-把「想学」变成「可执行的日程」。核心是**目标拆解 + 时间分配 + 定期复盘**，避免计划沦为一张好看的表。
+Turn "I want to study" into an **executable schedule**. The core is **goal breakdown + time allocation + regular review**, so the plan doesn't become just a pretty table.
 
-## 触发条件
+## Triggers
 
-- 用户要「学习计划 / 复习安排 / 考前冲刺 / 每周学什么」
-- 用户说「我时间紧，怎么安排」「期末怎么复习」
-- 用户想建立长期学习习惯
+- The user wants a "study plan / review schedule / exam-cram / what to study each week"
+- The user says "I'm short on time, how should I arrange it" / "how do I review for finals"
+- The user wants to build a long-term study habit
 
-## 制定流程
+## Planning Flow
 
-### 第 1 步：收集必要信息
-- **目标**：备考什么 / 想达成什么（如「期末数学 90 分」「掌握二次函数」）
-- **时间**：距离目标还有多久；每天能投入多少时间
-- **现状**：当前水平、强弱科目/章节、已学内容
-- **形式偏好**：每天固定时间，还是列出任务清单
+### Step 1: Gather the needed info
+- **Goal**: what exam to prepare for / what to achieve (e.g., "score 90 on the math final", "master quadratic functions")
+- **Time**: how long until the goal; how much time per day can be committed
+- **Current state**: current level, strong/weak subjects or chapters, what's already learned
+- **Format preference**: fixed daily time, or a task checklist
 
-> 信息不足时先问，不臆造「每天 2 小时」这类假设。
+> If info is missing, ask first; don't assume things like "2 hours a day".
 
-### 第 2 步：目标拆解（从大到小）
-- 把总目标拆成「阶段 → 每周 → 每天」三层
-- 每层给出**可量化**的小目标（如「本周做完 3 套真题的错题」）
+### Step 2: Break down the goal (large → small)
+- Split the overall goal into "phase → week → day" three layers
+- Give each layer a **quantifiable** sub-goal (e.g., "redo the mistakes of 3 past papers this week")
 
-### 第 3 步：时间与优先级分配
-- 按「薄弱优先 + 遗忘曲线」安排：先补薄弱，再巩固已懂
-- 给每块内容标注优先级（高/中/低）
-- 预留复习与复盘时间，不建议排满
-- **复习任务以真实到期待复习的错题为准**，先查当日到期题再排计划：
+### Step 3: Allocate time & priority
+- Arrange by "weak spots first + forgetting curve": shore up the weak areas first, then consolidate what's understood
+- Label each block with priority (high / mid / low)
+- Reserve time for review and reflection; don't fill the schedule to the brim
+- **Base review tasks on the mistakes actually due today** — check the day's due items first, then build the plan:
   ```bash
-  node scripts/review-cycle.mjs due                  # 今天到期的错题
-  node scripts/review-cycle.mjs due --subject 数学   # 只看数学
+  node scripts/review-cycle.mjs due                  # mistakes due today
+  node scripts/review-cycle.mjs due --subject Math   # Math only
   ```
-  > 计划表里的「复习」不是随手加的，而是 `due` 实际列出的到期题，避免复习安排悬浮于真实错题之外。
+  > "Review" in the plan isn't added casually — it's the due items actually listed by `due`, so the review schedule stays anchored to real mistakes.
 
-### 第 4 步：生成计划表
-给出清晰的分日/分周任务表，并标注：
-- 每天：具体任务 + 预计时长 + 优先级
-- 每周：一次复盘点（学了什么、哪里没懂、下周调整）
+### Step 4: Generate the plan table
+Give a clear day/week-by-week task table, annotated with:
+- Each day: specific task + estimated time + priority
+- Each week: one review point (what was learned, what's unclear, next-week adjustments)
 
-### 第 5 步：复盘与调整
-- 教用户一个简单的复盘方法（如每日 3 问：今天学了什么 / 哪里卡住 / 明天做什么）
-- 说明计划可变：每周按实际情况微调
+### Step 5: Reflect & adjust
+- Teach the student a simple reflection method (e.g., daily 3 questions: what did I learn today / where am I stuck / what will I do tomorrow)
+- Make clear the plan is flexible: fine-tune weekly based on reality
 
-## 输出模板
+## Output Template
 
 ```
-【目标】<...>
-【时间】<距目标 X 天 · 每天约 Y 小时>
+【Goal】<...>
+【Time】<X days to goal · ~Y hours/day>
 
-【阶段拆解】
-阶段 1（第 1-3 天）：...
-阶段 2（第 4-7 天）：...
+【Phase Breakdown】
+Phase 1 (days 1-3): ...
+Phase 2 (days 4-7): ...
 
-【本周 / 每日计划】
-（表格：日期 | 任务 | 时长 | 优先级）
+【This Week / Daily Plan】
+(table: date | task | time | priority)
 
-【复盘点】
-每周 X：做一次 <复述/小测验>，记录卡点，下周调整。
+【Review Point】
+Every week X: do a <restate/quiz>, note sticking points, adjust next week.
 
-【给学生的建议】
-- 薄弱优先：重点补 <章节>
-- 预留缓冲：别排满，留 20% 弹性
+【Advice for the Student】
+- Weak spots first: focus on <chapter>
+- Keep buffer: don't fill everything; leave 20% flexibility
 ```
 
-## 注意事项
+## Notes
 
-- 计划要「可执行」，宁可少而准，不要多而空。
-- 结合学科的遗忘规律，安排「讲→练→隔天复述」的节奏。
-- 若用户目标模糊，先帮其明确一个具体、可衡量的目标。
+- The plan must be **executable** — better fewer but accurate than many but empty.
+- Combine with the subject's forgetting pattern: arrange a "teach → practice → next-day restate" rhythm.
+- If the user's goal is vague, first help them define a specific, measurable goal.
